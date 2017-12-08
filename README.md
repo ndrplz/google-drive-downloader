@@ -1,6 +1,13 @@
 # google-drive-downloader
 Minimal class to download shared files from Google Drive.
 
+### How to install:
+Installing is as simple as
+
+```
+pip install googledrivedownloader
+```
+
 ### How to use
 You will need to obtain the sharable link from Google Drive:
 
