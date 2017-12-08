@@ -8,12 +8,37 @@ from os.path import exists
 
 
 class GoogleDriveDownloader:
+    """
+    Minimal class to download shared files from Google Drive.
+    """
 
     CHUNK_SIZE = 32768
     DOWNLOAD_URL = "https://docs.google.com/uc?export=download"
 
     @staticmethod
     def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False):
+        """
+        Downloads a shared file from google drive into a given folder.
+        Optionally unzips it.
+
+        Parameters
+        ----------
+        file_id: str
+            the file identifier.
+            You can obtain it from the sherable link.
+        dest_path: str
+            the destination where to save the downloaded file.
+            Must be a path (for example: './downloaded_file.txt')
+        overwrite: bool
+            optional, if True forces re-download and overwrite.
+        unzip: bool
+            optional, if True unzips a file.
+            If the file is not a zip file, ignores it.
+
+        Returns
+        -------
+        None
+        """
 
         destination_directory = dirname(dest_path)
         if not exists(destination_directory):
