@@ -2,6 +2,7 @@ from __future__ import print_function
 import requests
 import zipfile
 import warnings
+from sys import stdout
 from os import makedirs
 from os.path import dirname
 from os.path import exists
@@ -48,7 +49,9 @@ class GoogleDriveDownloader:
 
             session = requests.Session()
 
-            print('Downloading {} into {}... '.format(file_id, dest_path), end='', flush=True)
+            print('Downloading {} into {}... '.format(file_id, dest_path), end='')
+            stdout.flush()
+
             response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params={'id': file_id}, stream=True)
 
             token = GoogleDriveDownloader._get_confirm_token(response)
@@ -61,7 +64,8 @@ class GoogleDriveDownloader:
 
             if unzip:
                 try:
-                    print('Unzipping...', end='', flush=True)
+                    print('Unzipping...', end='')
+                    stdout.flush()
                     with zipfile.ZipFile(dest_path, 'r') as z:
                         z.extractall(destination_directory)
                     print('Done.')
