@@ -26,7 +26,7 @@ class GoogleDriveDownloader:
         ----------
         file_id: str
             the file identifier.
-            You can obtain it from the sherable link.
+            You can obtain it from the sharable link.
         dest_path: str
             the destination where to save the downloaded file.
             Must be a path (for example: './downloaded_file.txt')
