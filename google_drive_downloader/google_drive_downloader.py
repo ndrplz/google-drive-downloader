@@ -17,7 +17,7 @@ class GoogleDriveDownloader:
     DOWNLOAD_URL = "https://docs.google.com/uc?export=download"
 
     @staticmethod
-    def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False):
+    def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False, showsize=False):
         """
         Downloads a shared file from google drive into a given folder.
         Optionally unzips it.
@@ -35,7 +35,8 @@ class GoogleDriveDownloader:
         unzip: bool
             optional, if True unzips a file.
             If the file is not a zip file, ignores it.
-
+        showsize: bool
+            optional, if True print the current download size.
         Returns
         -------
         None
@@ -59,7 +60,11 @@ class GoogleDriveDownloader:
                 params = {'id': file_id, 'confirm': token}
                 response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params=params, stream=True)
 
-            GoogleDriveDownloader._save_response_content(response, dest_path)
+            if showsize:
+                print()  # Skip to the next line
+
+            current_download_size = [0]
+            GoogleDriveDownloader._save_response_content(response, dest_path, showsize, current_download_size)
             print('Done.')
 
             if unzip:
@@ -80,8 +85,21 @@ class GoogleDriveDownloader:
         return None
 
     @staticmethod
-    def _save_response_content(response, destination):
+    def _save_response_content(response, destination, showsize, current_size):
         with open(destination, "wb") as f:
             for chunk in response.iter_content(GoogleDriveDownloader.CHUNK_SIZE):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
+                    if showsize:
+                        print('                    \r', end='')  # Clear the line and return to the beginning
+                        current_size[0] += GoogleDriveDownloader.CHUNK_SIZE
+                        print(GoogleDriveDownloader.sizeof_fmt(current_size[0]), end=' ')
+
+    # From https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+    @staticmethod
+    def sizeof_fmt(num, suffix='B'):
+        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
