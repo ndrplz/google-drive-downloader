@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='googledrivedownloader',
-    version='0.2',
+    version='0.4',
     packages=['google_drive_downloader'],
     url='https://github.com/ndrplz/google-drive-downloader',
     download_url='https://github.com/ndrplz/google-drive-downloader/archive/0.2.tar.gz',
