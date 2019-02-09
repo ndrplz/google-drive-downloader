@@ -1,4 +1,5 @@
 from __future__ import print_function
+import re
 import requests
 import zipfile
 import warnings
@@ -14,10 +15,10 @@ class GoogleDriveDownloader:
     """
 
     CHUNK_SIZE = 32768
-    DOWNLOAD_URL = "https://docs.google.com/uc?export=download"
+    DOWNLOAD_URL = 'https://docs.google.com/uc?export=download'
 
     @staticmethod
-    def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False):
+    def download_file_from_google_drive(file_id, dest_path='', overwrite=False, unzip=False, showsize=False):
         """
         Downloads a shared file from google drive into a given folder.
         Optionally unzips it.
@@ -26,30 +27,36 @@ class GoogleDriveDownloader:
         ----------
         file_id: str
             the file identifier.
-            You can obtain it from the sherable link.
+            You can obtain it from the sharable link.
         dest_path: str
-            the destination where to save the downloaded file.
+            optional, the destination where to save the downloaded file.
             Must be a path (for example: './downloaded_file.txt')
+            If omitted, it will try to get the correct name from the response headers
+            and download in the local directory.
         overwrite: bool
             optional, if True forces re-download and overwrite.
         unzip: bool
             optional, if True unzips a file.
             If the file is not a zip file, ignores it.
-
+        showsize: bool
+            optional, if True prints the current download size.
         Returns
         -------
         None
         """
 
-        destination_directory = dirname(dest_path)
-        if not exists(destination_directory):
-            makedirs(destination_directory)
+        if dest_path:
+            destination_directory = dirname(dest_path)
+            if not exists(destination_directory):
+                makedirs(destination_directory)
 
         if not exists(dest_path) or overwrite:
 
             session = requests.Session()
 
-            print('Downloading {} into {}... '.format(file_id, dest_path), end='')
+            print('Downloading {}'.format(file_id), end='')
+            if dest_path:
+                print(' into {}... '.format(dest_path), end='')
             stdout.flush()
 
             response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params={'id': file_id}, stream=True)
@@ -59,7 +66,21 @@ class GoogleDriveDownloader:
                 params = {'id': file_id, 'confirm': token}
                 response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params=params, stream=True)
 
-            GoogleDriveDownloader._save_response_content(response, dest_path)
+            if not dest_path:
+                # Get the filename from the response header 'Content-Disposition'
+                match = re.search(r'filename="(?P<filename>[0-9A-Za-z ,\.\-\+\(\)\[\]]+)"', response.headers['Content-Disposition'])
+
+                # Make it system safe, stripping commas
+                dest_path = match['filename'].replace(',', '_')
+
+                print(' into {}... '.format(dest_path), end='')
+                stdout.flush()
+
+            if showsize:
+                print()  # Skip to the next line
+
+            current_download_size = [0]
+            GoogleDriveDownloader._save_response_content(response, dest_path, showsize, current_download_size)
             print('Done.')
 
             if unzip:
@@ -80,8 +101,21 @@ class GoogleDriveDownloader:
         return None
 
     @staticmethod
-    def _save_response_content(response, destination):
-        with open(destination, "wb") as f:
+    def _save_response_content(response, destination, showsize, current_size):
+        with open(destination, 'wb') as f:
             for chunk in response.iter_content(GoogleDriveDownloader.CHUNK_SIZE):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
+                    if showsize:
+                        print('\r' + GoogleDriveDownloader.sizeof_fmt(current_size[0]), end='')
+                        stdout.flush()
+                        current_size[0] += GoogleDriveDownloader.CHUNK_SIZE
+
+    # From https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+    @staticmethod
+    def sizeof_fmt(num, suffix='B'):
+        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+            if abs(num) < 1024.0:
+                return '{:.1f} {}{}'.format(num, unit, suffix)
+            num /= 1024.0
+        return '{:.1f} {}{}'.format(num, 'Yi', suffix)
