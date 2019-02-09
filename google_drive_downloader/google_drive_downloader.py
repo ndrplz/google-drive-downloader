@@ -15,7 +15,7 @@ class GoogleDriveDownloader:
     """
 
     CHUNK_SIZE = 32768
-    DOWNLOAD_URL = "https://docs.google.com/uc?export=download"
+    DOWNLOAD_URL = 'https://docs.google.com/uc?export=download'
 
     @staticmethod
     def download_file_from_google_drive(file_id, dest_path='', overwrite=False, unzip=False, showsize=False):
@@ -102,7 +102,7 @@ class GoogleDriveDownloader:
 
     @staticmethod
     def _save_response_content(response, destination, showsize, current_size):
-        with open(destination, "wb") as f:
+        with open(destination, 'wb') as f:
             for chunk in response.iter_content(GoogleDriveDownloader.CHUNK_SIZE):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
@@ -116,6 +116,6 @@ class GoogleDriveDownloader:
     def sizeof_fmt(num, suffix='B'):
         for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
             if abs(num) < 1024.0:
-                return "%3.1f%s%s" % (num, unit, suffix)
+                return '{:.1f} {}{}'.format(num, unit, suffix)
             num /= 1024.0
-        return "%.1f%s%s" % (num, 'Yi', suffix)
+        return '{:.1f} {}{}'.format(num, 'Yi', suffix)
