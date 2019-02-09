@@ -107,9 +107,9 @@ class GoogleDriveDownloader:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
                     if showsize:
-                        print('                    \r', end='')  # Clear the line and return to the beginning
+                        print('\r' + GoogleDriveDownloader.sizeof_fmt(current_size[0]), end='')
+                        stdout.flush()
                         current_size[0] += GoogleDriveDownloader.CHUNK_SIZE
-                        print(GoogleDriveDownloader.sizeof_fmt(current_size[0]), end=' ')
 
     # From https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
     @staticmethod
