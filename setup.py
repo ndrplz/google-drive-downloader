@@ -4,6 +4,7 @@ setup(
     name='googledrivedownloader',
     version='0.4',
     packages=['google_drive_downloader'],
+    install_requires=['requests'],
     url='https://github.com/ndrplz/google-drive-downloader',
     download_url='https://github.com/ndrplz/google-drive-downloader/archive/0.2.tar.gz',
     license='MIT',
