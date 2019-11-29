@@ -24,3 +24,16 @@ This will download a `mnist.zip` file into a `data` folder and unzip it.
 ### Tips
 * Set `showsize=True` to see the download progress
 * Set `overwrite=True` you really want to overwrite an already existent file.
+
+### Use from console
+
+Once installed, the library can also be used to download directly from your console.
+
+```bash
+# show help for the parameters
+googledrivedownloader -h
+
+# download the file of the previous example
+# parameters are in the order: file_id dest_path [overwrite] [unzip] [showsize]
+googledrivedownloader "1iytA1n2z4go3uVCwE__vIKouTKyIDjEq" "./data/mnist.zip" False True
+```
