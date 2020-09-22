@@ -8,6 +8,11 @@ Installing is as simple as
 pip install googledrivedownloader
 ```
 
+or if you prefer to download with anaconda
+```
+conda install -c conda-forge googledrivedownloader
+```
+
 ### Hello World
 You will need to obtain the sharable link from Google Drive:
 
