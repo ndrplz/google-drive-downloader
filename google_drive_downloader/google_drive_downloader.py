@@ -10,7 +10,7 @@ from os.path import exists
 
 class GoogleDriveDownloader:
     """
-    Minimal class to download shared files from Google Drive.
+    Minimal class to download shared files from Google Drive through download_file_from_google_drive method.
     """
 
     CHUNK_SIZE = 32768
