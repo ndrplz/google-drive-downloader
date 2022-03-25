@@ -53,7 +53,7 @@ class GoogleDriveDownloader:
             print('Downloading {} into {}... '.format(file_id, dest_path), end='')
             stdout.flush()
 
-            response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params={'id': file_id}, stream=True)
+            response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params={'id': file_id, confirm: 't'}, stream=True)
 
             token = GoogleDriveDownloader._get_confirm_token(response)
             if token:
