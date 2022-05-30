@@ -58,7 +58,7 @@ class GoogleDriveDownloader:
             token = GoogleDriveDownloader._get_confirm_token(response)
             if token:
                 params = {'id': file_id, 'confirm': token}
-                response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params=params, stream=True)
+                response = session.post(GoogleDriveDownloader.DOWNLOAD_URL, params=params, stream=True)
 
             if showsize:
                 print()  # Skip to the next line
@@ -79,10 +79,7 @@ class GoogleDriveDownloader:
 
     @staticmethod
     def _get_confirm_token(response):
-        for key, value in response.cookies.items():
-            if key.startswith('download_warning'):
-                return value
-        return None
+        return response.text.startswith("<!DOCTYPE html>")
 
     @staticmethod
     def _save_response_content(response, destination, showsize, current_size):
