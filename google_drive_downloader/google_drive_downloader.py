@@ -15,6 +15,7 @@ class GoogleDriveDownloader:
 
     CHUNK_SIZE = 32768
     DOWNLOAD_URL = 'https://docs.google.com/uc?export=download'
+    GG_DRIVE_URL = 'https://drive.google.com/u/2/uc?export=download'
 
     @staticmethod
     def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False, showsize=False):
@@ -53,12 +54,14 @@ class GoogleDriveDownloader:
             print('Downloading {} into {}... '.format(file_id, dest_path), end='')
             stdout.flush()
 
-            response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params={'id': file_id}, stream=True)
+            # response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params={'id': file_id}, stream=True)
 
-            token = GoogleDriveDownloader._get_confirm_token(response)
-            if token:
-                params = {'id': file_id, 'confirm': token}
-                response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params=params, stream=True)
+            # token = GoogleDriveDownloader._get_confirm_token(response)
+            # if token:
+            #     params = {'id': file_id, 'confirm': token}
+            #     response = session.get(GoogleDriveDownloader.DOWNLOAD_URL, params=params, stream=True)
+
+            response = session.post(GoogleDriveDownloader.GG_DRIVE_URL, params={'id': file_id, 'confirm': 't'}, stream=True)
 
             if showsize:
                 print()  # Skip to the next line
