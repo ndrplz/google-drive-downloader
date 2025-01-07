@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "googledrivedownloader"
+version = "1.0.0"
+dependencies = [
+  "requests",
+]
+authors = [
+  { name = "Davide Abati and Andrea Palazzi"},
+]
+maintainers = [
+  {name = "Andrea Palazzi", email = "ndrplz@gmail.com"}
+]
+description = "Minimal class to download shared files from Google Drive."
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/ndrplz/google-drive-downloader"
+Issues = "https://github.com/ndrplz/google-drive-downloader/issues"
