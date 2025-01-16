@@ -20,13 +20,6 @@ def _sizeof_fmt(num, suffix='B'):
     return '{:.1f} {}{}'.format(num, 'Yi', suffix)
 
 
-def _get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            return value
-    return None
-
-
 def _save_response_content(response, destination, showsize, current_size):
     with open(destination, 'wb') as f:
         for chunk in response.iter_content(CHUNK_SIZE):
@@ -74,12 +67,8 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
         print('Downloading {} into {}... '.format(file_id, dest_path), end='')
         stdout.flush()
 
-        response = session.get(DOWNLOAD_URL, params={'id': file_id}, stream=True)
-
-        token = _get_confirm_token(response)
-        if token:
-            params = {'id': file_id, 'confirm': token}
-            response = session.get(DOWNLOAD_URL, params=params, stream=True)
+        params = {'id': file_id, 'confirm': True}
+        response = session.post(DOWNLOAD_URL, params=params, stream=True)
 
         if showsize:
             print()  # Skip to the next line
