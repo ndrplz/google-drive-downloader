@@ -1,4 +1,4 @@
-import warnings
+import logging
 import zipfile
 from os import makedirs
 from os.path import dirname
@@ -6,6 +6,8 @@ from os.path import exists
 from sys import stdout
 
 from requests import Session
+
+logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 32768
 DOWNLOAD_URL = 'https://docs.google.com/uc?export=download'
@@ -26,7 +28,7 @@ def _save_response_content(response, destination, showsize, current_size):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 if showsize:
-                    print('\r' + _sizeof_fmt(current_size[0]), end=' ')
+                    logger.info('\r' + _sizeof_fmt(current_size[0]), end=' ')
                     stdout.flush()
                     current_size[0] += CHUNK_SIZE
 
@@ -66,7 +68,7 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
 
         session = Session()
 
-        print('Downloading {} into {}... '.format(file_id, dest_path), end='')
+        logger.info('Downloading {} into {}... '.format(file_id, dest_path), end='')
         stdout.flush()
 
         params = {'id': file_id, 'confirm': True}
@@ -77,26 +79,26 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
             if raise_errors:
                 raise Exception(msg)
             else:
-                warnings.warn(msg)
+                logger.warn(msg)
                 return
 
         if showsize:
-            print()  # Skip to the next line
+            logger.info()  # Skip to the next line
 
         current_download_size = [0]
         _save_response_content(response, dest_path, showsize, current_download_size)
-        print('Done.')
+        logger.info('Done.')
 
         if unzip:
             try:
-                print('Unzipping...', end='')
+                logger.info('Unzipping...', end='')
                 stdout.flush()
                 with zipfile.ZipFile(dest_path, 'r') as z:
                     z.extractall(destination_directory)
-                print('Done.')
+                logger.info('Done.')
             except zipfile.BadZipfile:
                 msg = 'Ignoring `unzip` since "{}" does not look like a valid zip file'.format(file_id)
                 if raise_errors:
                     raise Exception(msg)
                 else:
-                    warnings.warn(msg)
+                    logger.warn(msg)
