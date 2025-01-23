@@ -3,7 +3,6 @@ import zipfile
 from os import makedirs
 from os.path import dirname
 from os.path import exists
-from sys import stdout
 
 from requests import Session
 
@@ -29,8 +28,7 @@ def _save_response_content(response, destination, showsize, current_size):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 if showsize:
-                    logger.info('\r' + _sizeof_fmt(current_size[0]), end=' ')
-                    stdout.flush()
+                    logger.info('\r' + _sizeof_fmt(current_size[0]) + ' ')
                     current_size[0] += CHUNK_SIZE
 
 
@@ -69,8 +67,7 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
 
         session = Session()
 
-        logger.info('Downloading {} into {}... '.format(file_id, dest_path), end='')
-        stdout.flush()
+        logger.info('Downloading {} into {}... '.format(file_id, dest_path))
 
         params = {'id': file_id, 'confirm': True}
         response = session.post(DOWNLOAD_URL, params=params, stream=True)
@@ -92,8 +89,7 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
 
         if unzip:
             try:
-                logger.info('Unzipping...', end='')
-                stdout.flush()
+                logger.info('Unzipping...')
                 with zipfile.ZipFile(dest_path, 'r') as z:
                     z.extractall(destination_directory)
                 logger.info('Done.')
