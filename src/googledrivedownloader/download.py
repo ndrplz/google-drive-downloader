@@ -8,6 +8,7 @@ from sys import stdout
 from requests import Session
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CHUNK_SIZE = 32768
 DOWNLOAD_URL = 'https://docs.google.com/uc?export=download'
