@@ -31,7 +31,7 @@ def _save_response_content(response, destination, showsize, current_size):
                     current_size[0] += CHUNK_SIZE
 
 
-def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False, showsize=False):
+def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False, showsize=False, raise_errors=False):
     """
     Downloads a shared file from Google Drive into a given folder.
     Optionally unzips it.
@@ -51,6 +51,8 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
         If the file is not a zip file, ignores it.
     showsize: bool
         optional, if True print the current download size.
+    raise_errors: bool
+        optional, if True raises an error when the download fails.
     Returns
     -------
     None
@@ -71,9 +73,12 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
         response = session.post(DOWNLOAD_URL, params=params, stream=True)
 
         if not response.ok:
-            raise Exception(
-                f'Download error code {response.status_code}: {response.reason}.'
-            )
+            msg = f'Download error code {response.status_code}: {response.reason}.'
+            if raise_errors:
+                raise Exception(msg)
+            else:
+                warnings.warn(msg)
+                return
 
         if showsize:
             print()  # Skip to the next line
@@ -90,4 +95,8 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
                     z.extractall(destination_directory)
                 print('Done.')
             except zipfile.BadZipfile:
-                warnings.warn('Ignoring `unzip` since "{}" does not look like a valid zip file'.format(file_id))
+                msg = 'Ignoring `unzip` since "{}" does not look like a valid zip file'.format(file_id)
+                if raise_errors:
+                    raise Exception(msg)
+                else:
+                    warnings.warn(msg)
