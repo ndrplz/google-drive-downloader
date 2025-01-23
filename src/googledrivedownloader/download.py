@@ -1,11 +1,13 @@
-import warnings
+import logging
 import zipfile
 from os import makedirs
 from os.path import dirname
 from os.path import exists
-from sys import stdout
 
 from requests import Session
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CHUNK_SIZE = 32768
 DOWNLOAD_URL = 'https://docs.google.com/uc?export=download'
@@ -26,12 +28,11 @@ def _save_response_content(response, destination, showsize, current_size):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 if showsize:
-                    print('\r' + _sizeof_fmt(current_size[0]), end=' ')
-                    stdout.flush()
+                    logger.info('\r' + _sizeof_fmt(current_size[0]) + ' ')
                     current_size[0] += CHUNK_SIZE
 
 
-def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False, showsize=False):
+def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=False, showsize=False, raise_errors=False):
     """
     Downloads a shared file from Google Drive into a given folder.
     Optionally unzips it.
@@ -51,6 +52,8 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
         If the file is not a zip file, ignores it.
     showsize: bool
         optional, if True print the current download size.
+    raise_errors: bool
+        optional, if True raises an error when the download fails.
     Returns
     -------
     None
@@ -64,25 +67,35 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
 
         session = Session()
 
-        print('Downloading {} into {}... '.format(file_id, dest_path), end='')
-        stdout.flush()
+        logger.info('Downloading {} into {}... '.format(file_id, dest_path))
 
         params = {'id': file_id, 'confirm': True}
         response = session.post(DOWNLOAD_URL, params=params, stream=True)
 
+        if not response.ok:
+            msg = f'Download error code {response.status_code}: {response.reason}.'
+            if raise_errors:
+                raise Exception(msg)
+            else:
+                logger.warn(msg)
+                return
+
         if showsize:
-            print()  # Skip to the next line
+            logger.info()  # Skip to the next line
 
         current_download_size = [0]
         _save_response_content(response, dest_path, showsize, current_download_size)
-        print('Done.')
+        logger.info('Done.')
 
         if unzip:
             try:
-                print('Unzipping...', end='')
-                stdout.flush()
+                logger.info('Unzipping...')
                 with zipfile.ZipFile(dest_path, 'r') as z:
                     z.extractall(destination_directory)
-                print('Done.')
+                logger.info('Done.')
             except zipfile.BadZipfile:
-                warnings.warn('Ignoring `unzip` since "{}" does not look like a valid zip file'.format(file_id))
+                msg = 'Ignoring `unzip` since "{}" does not look like a valid zip file'.format(file_id)
+                if raise_errors:
+                    raise Exception(msg)
+                else:
+                    logger.warn(msg)
