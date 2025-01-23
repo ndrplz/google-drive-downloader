@@ -70,6 +70,11 @@ def download_file_from_google_drive(file_id, dest_path, overwrite=False, unzip=F
         params = {'id': file_id, 'confirm': True}
         response = session.post(DOWNLOAD_URL, params=params, stream=True)
 
+        if not response.ok:
+            raise Exception(
+                f'Download error code {response.status_code}: {response.reason}.'
+            )
+
         if showsize:
             print()  # Skip to the next line
 
